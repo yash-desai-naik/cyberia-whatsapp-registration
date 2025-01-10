@@ -74,7 +74,9 @@ export class WhatsAppService {
         // payment_url.searchParams.append('events', events);
 
         return `🎉 Registration Successful!
-        To download your ticket, click here: ${payment_url}`;
+        To continue with the payment, click here: ${payment_url}
+        
+        After the payment, you will receive your ticket URL.`;
     }
 
     static async handleMessage(body: string, from: string) {
