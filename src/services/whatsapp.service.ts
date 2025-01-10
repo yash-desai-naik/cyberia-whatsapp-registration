@@ -156,9 +156,11 @@ Team Registration: https://whatsform.com/aplTii`;
             console.log('Unrecognized message format:', body);
 
             // Handle unrecognized messages
-            await this.sendMessage(from,
-                'Sorry, I could not process your message. Please make sure you\'re using the correct form.'
-            );
+            if (!body.toLowerCase().endsWith('.pdf')) {
+                await this.sendMessage(from,
+                    'Sorry, I could not process your message. Please make sure you\'re using the correct form.'
+                );
+            }
 
         } catch (error) {
             console.error('Error handling message:', error);
