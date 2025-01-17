@@ -2,3 +2,5 @@
 /.env
 /node_modules
 /package-lock.json
+.idea/
+src/tests/http-client.private.env.json
