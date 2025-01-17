@@ -1,66 +1,78 @@
 // src/services/whatsapp.service.ts
-import axios from 'axios';
+import twilio from 'twilio';
+import { config } from '../config/config';
 import { MessageParser } from '../utils/messageParser';
 import { PaymentService } from './payment.service';
 import { SoloRegistrationResponse } from '../types/types';
 
-const WHATSAPP_API_BASE_URL = process.env.WHATSAPP_API_BASE_URL;
-const WHATSAPP_API_TOKEN = process.env.WHATSAPP_API_TOKEN;
+const client = twilio(config.twilioAccountSid, config.twilioAuthToken);
 
 export class WhatsAppService {
-    /**
-     * Send a WhatsApp message using the WhatsApp Cloud API.
-     */
     static async sendMessage(to: string, body: string) {
         try {
-            const response = await axios.post(
-                `${WHATSAPP_API_BASE_URL}`,
-                {
-                    messaging_product: 'whatsapp',
-                    to,
-                    text: {
-                        body
-                    }
-                },
-                {
-                    headers: {
-                        Authorization: `Bearer ${WHATSAPP_API_TOKEN}`,
-                        'Content-Type': 'application/json'
-                    }
-                }
-            );
-            return response.data;
+            const message = await client.messages.create({
+                from: `whatsapp:${config.twilioPhoneNumber}`,
+                to: `whatsapp:${to}`,
+                body
+            });
+            return message;
         } catch (error) {
-            if (axios.isAxiosError(error)) {
-                console.error('Error sending WhatsApp message:', error.response?.data || error.message);
-            } else {
-                console.error('Unexpected error sending WhatsApp message:', error);
-            }
+            console.error('Error sending WhatsApp message:', error);
             throw error;
         }
     }
-
-    /**
-     * Format registration response message.
-     */
     static formatRegistrationResponse(response: SoloRegistrationResponse): string {
-        const { data,  gender } = response;
+        const { data, message, gender } = response;
+        //         return `🎉 Registration Successful! 
 
-        const payment_url = new URL('https://www.msudcacyberia.in/chatbot');
-        // Add query parameters
-        payment_url.searchParams.append('fullName', data.fullName);
-        payment_url.searchParams.append('email', data.email);
-        payment_url.searchParams.append('contactNo', data.contactNo.toString());
-        payment_url.searchParams.append('contactNo2', data.contactNo2.toString());
-        payment_url.searchParams.append('institute', data.institute);
-        payment_url.searchParams.append('year', data.year);
-        payment_url.searchParams.append('level', data.level);
-        payment_url.searchParams.append('age', data.age);
-        payment_url.searchParams.append('gender', gender);
-        payment_url.searchParams.append('stream', data.stream);
-        payment_url.searchParams.append('events', data.events);
+        // Name: ${SoloData.fullName}
+        // Events: ${SoloData.events}
+        // Institute: ${SoloData.institute}
 
-        // Return formatted message
+        // Your ticket has been generated. You can download it here:
+        // ${SoloData.ticket}
+
+        // QR Code ID: ${SoloData.qrString}
+        // Please keep this QR code handy for the event.
+
+        // See you at the event! 🚀`;
+
+
+
+
+        const {
+            fullName,
+            stream,
+            email,
+            contactNo,
+            contactNo2,
+            institute,
+            year,
+            level,
+            events,
+            age,
+
+        } = data;
+
+        console.log('Data:', data);
+        console.log('Events:', events);
+        const payment_url = `https://www.msudcacyberia.in/chatbot?fullName=${
+            fullName
+        }&email=${email}&contactNo=${contactNo}&contactNo2=${contactNo2}&institute=${institute}&year=${year}&level=${level}&age=${age}&gender=${gender}&stream=${stream}&events=${events}`;
+
+        // make url using query builder
+        // const payment_url = new URL('https://www.msudcacyberia.in/chatbot');
+        // payment_url.searchParams.append('fullName', fullName);
+        // payment_url.searchParams.append('email', email);
+        // payment_url.searchParams.append('contactNo', contactNo.toString());
+        // payment_url.searchParams.append('contactNo2', contactNo2.toString());
+        // payment_url.searchParams.append('institute', institute);
+        // payment_url.searchParams.append('year', year);
+        // payment_url.searchParams.append('level', level);
+        // payment_url.searchParams.append('age', age);
+        // payment_url.searchParams.append('stream', stream);
+        // payment_url.searchParams.append('events', events);
+
         return `🎉 Registration Successful!
         To continue with the payment, click here: ${payment_url}
         
@@ -84,14 +96,50 @@ Team Registration: https://whatsform.com/aplTii`;
             const soloData = MessageParser.parseSoloForm(body);
             if (soloData) {
                 try {
-                    console.log('Solo data:', soloData);
-                    const registrationResponse = await PaymentService.processSoloPayment(soloData);
-                    const formattedResponse = this.formatRegistrationResponse(registrationResponse);
-                    await this.sendMessage(from, formattedResponse);
+                    // const registrationResponse = await PaymentService.processSoloPayment(soloData);
+                    // const formattedResponse = this.formatRegistrationResponse(registrationResponse);
+                    // await this.sendMessage(from, formattedResponse);
+                    console.log('Solo data: ######', soloData);
+                    const {
+                        fullName,
+                        stream,
+                        email,
+                        contactNo,
+                        contactNo2,
+                        institute,
+                        year,
+                        level,
+                        events,
+                        age,
+                        gender,
+                        price
+                    } = soloData;
+                    // const payment_url = `https://www.msudcacyberia.in/chatbot?fullName=${
+                    //     fullName
+                    // }&email=${email}&contactNo=${contactNo}&contactNo2=${contactNo2}&institute=${institute}&year=${year}&level=${level}&age=${age}&gender=${gender}&stream=${stream}&events=${events.join(',')}`;
+
+                    const payment_url = new URL('https://www.msudcacyberia.in/chatbot');
+                    payment_url.searchParams.append('fullName', fullName);
+                    payment_url.searchParams.append('email', email);
+                    payment_url.searchParams.append('contactNo', contactNo.toString());
+                    payment_url.searchParams.append('contactNo2', contactNo2.toString());
+                    payment_url.searchParams.append('institute', institute);
+                    payment_url.searchParams.append('year', year);
+                    payment_url.searchParams.append('level', level);
+                    payment_url.searchParams.append('gender', gender);
+                    payment_url.searchParams.append('age', age);
+                    payment_url.searchParams.append('stream', stream);
+                    payment_url.searchParams.append('events', events.join(','));
+
+                //    const response  =  await fetch(payment_url);
+                //      const data = await response.json();
+                //         console.log('data:', data);
+                    await this.sendMessage(from, `🎉 Registration Successful!
+                    To download your ticket, click here: ${payment_url}`);
+
                 } catch (error) {
-                    await this.sendMessage(
-                        from,
-                        'Sorry, there was an error processing your registration. Please try again or contact support.'
+                    await this.sendMessage(from,
+                        "Sorry, there was an error processing your registration. Please try again or contact support."
                     );
                 }
                 return;
@@ -100,24 +148,22 @@ Team Registration: https://whatsform.com/aplTii`;
             // Handle team form submission
             const teamData = MessageParser.parseTeamForm(body);
             if (teamData) {
-                try {
-                    await PaymentService.processTeamPayment(teamData);
-                    await this.sendMessage(
-                        from,
-                        'Thank you for your team registration! Your payment is being processed.'
-                    );
-                } catch (error) {
-                    await this.sendMessage(from, 'There was an error with your team registration.');
-                }
+                await PaymentService.processTeamPayment(teamData);
+                await this.sendMessage(from,
+                    'Thank you for your team registration! Your payment is being processed.'
+                );
                 return;
             }
 
-            // Handle unrecognized messages
             console.log('Unrecognized message format:', body);
-            await this.sendMessage(
-                from,
-                'Sorry, I could not process your message. Please make sure you are using the correct form.'
-            );
+
+            // Handle unrecognized messages
+            if (!body.toLowerCase().endsWith('.pdf')) {
+                await this.sendMessage(from,
+                    'Sorry, I could not process your message. Please make sure you\'re using the correct form.'
+                );
+            }
+
         } catch (error) {
             console.error('Error handling message:', error);
             throw error;
