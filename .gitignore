@@ -3,4 +3,4 @@
 /node_modules
 /package-lock.json
 .idea/
-src/tests/http-client.private.env.json
+src/tests/http-client.private.env.jsonj

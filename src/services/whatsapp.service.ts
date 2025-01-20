@@ -8,19 +8,19 @@ import { SoloRegistrationResponse } from "../types/types";
 const client = twilio(config.twilioAccountSid, config.twilioAuthToken);
 
 export class WhatsAppService {
-  static async sendMessage(to: string, body: string) {
-    try {
-      const message = await client.messages.create({
-        from: `whatsapp:${config.twilioPhoneNumber}`,
-        to: `whatsapp:${to}`,
-        body,
-      });
-      return message;
-    } catch (error) {
-      console.error("Error sending WhatsApp message:", error);
-      throw error;
-    }
-  }
+   public static async sendMessage(to: string, body: string) {
+     try {
+       const message = await client.messages.create({
+         from: `whatsapp:${config.twilioPhoneNumber}`,
+         to: `whatsapp:${to}`,
+         body,
+       });
+       return message;
+     } catch (error) {
+       console.error("Error sending WhatsApp message:", error);
+       throw error;
+     }
+   }
   static formatRegistrationResponse(
     response: SoloRegistrationResponse
   ): string {
