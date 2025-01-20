@@ -2,6 +2,7 @@ import axios from "axios";
 import { Request, Response } from "express";
 import { randomUUID } from "node:crypto";
 import { create } from "node:domain";
+import { config } from "../config/config";
 // import { SoloFormData, SoloRegistrationResponse, TeamFormData } from '../types/types';
 
 // export class PaymentService {
@@ -51,9 +52,8 @@ export async function createPaymentLink(customerDetails: any, amount: number) {
   const options = {
     method: "POST",
     headers: {
-      "x-client-id": "TEST1034921662b6cfc52c511b087d6f61294301",
-      "x-client-secret":
-        "cfsk_ma_test_565e8000bb3de8b2e1efcf0616ee3256_627c314c",
+      "x-client-id": `${config.cashfreeClientId}`,
+      "x-client-secret": `${config.cashfreeClientSecret}`,
       "x-api-version": "2023-08-01",
       "Content-Type": "application/json",
     },
