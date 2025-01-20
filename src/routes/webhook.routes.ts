@@ -7,6 +7,7 @@ const twilio = require("twilio");
 const router = Router();
 
 import crypto from "crypto";
+import { config } from "../config/config";
 
 export class CashfreeService {
   static async handlePaymentSuccess(data: any) {
@@ -56,7 +57,7 @@ If you have any questions or need further assistance, feel free to message here.
     return true;
   }
   static verifyWebhookSignature(eventData: any, signature: string): boolean {
-    const secretKey = "cfsk_ma_prod_df4786f353e73ce5c1b3157f61399e6a_3d72ea70"; // Replace with your actual webhook secret key from Cashfree
+    const secretKey = `${config.cashfreeClientSecret}`; // Replace with your actual webhook secret key from Cashfree
     const payload = JSON.stringify(eventData);
 
     const computedSignature = crypto
